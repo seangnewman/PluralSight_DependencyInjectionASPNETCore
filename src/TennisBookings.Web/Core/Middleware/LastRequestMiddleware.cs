@@ -9,12 +9,12 @@ namespace TennisBookings.Web.Core.Middleware
     public class LastRequestMiddleware
     {
         private readonly RequestDelegate _next;
-        //private readonly UserManager<TennisBookingsUser> _userManager
+         
 
-        public LastRequestMiddleware(RequestDelegate next/*, UserManager<TennisBookingsUser> userManager*/)
+        public LastRequestMiddleware(RequestDelegate next)
         {
             _next = next;
-            //_userManager = userManager;
+           
         }
 
         public async Task InvokeAsync(HttpContext context, UserManager<TennisBookingsUser> userManager)

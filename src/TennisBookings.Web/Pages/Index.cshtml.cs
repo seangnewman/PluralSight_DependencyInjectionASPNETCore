@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Threading.Tasks;
 using TennisBookings.Web.Configuration;
@@ -28,6 +29,8 @@ namespace TennisBookings.Web.Pages
             _greetingService = greetingService;
             _featuresConfiguration = options.Value;
         }
+
+        
 
         public async Task OnGet()
         {
