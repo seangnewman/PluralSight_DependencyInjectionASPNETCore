@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Options;
 using TennisBookings.Web.Configuration;
 using TennisBookings.Web.Domain;
 
@@ -13,23 +12,23 @@ namespace TennisBookings.Web.Services
         private readonly ICourtService _courtService;
         private readonly ICollection<int> _closedHours;
 
-        public ClubClosedUnavailabilityProvider(ICourtService courtService, IOptions<ClubConfiguration> clubConfiguration)
+        public ClubClosedUnavailabilityProvider(ICourtService courtService, IClubConfiguration clubConfiguration)
         {
             _courtService = courtService;
 
             var closedHours = new List<int>();
 
-            if (clubConfiguration.Value.OpenHour > 0)
+            if (clubConfiguration.OpenHour > 0)
             {
-                for (var i = 0; i < clubConfiguration.Value.OpenHour; i++)
+                for (var i = 0; i < clubConfiguration.OpenHour; i++)
                 {
                     closedHours.Add(i);
                 }
             }
 
-            if (clubConfiguration.Value.CloseHour <= 23)
+            if (clubConfiguration.CloseHour <= 23)
             {
-                for (var i = clubConfiguration.Value.CloseHour; i <= 23; i++)
+                for (var i = clubConfiguration.CloseHour; i <= 23; i++)
                 {
                     closedHours.Add(i);
                 }

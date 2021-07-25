@@ -9,4 +9,12 @@ namespace TennisBookings.Web.Domain.Rules
 
         string ErrorMessage { get; }
     }
+
+    public interface IScopedCourtBookingRule : ICourtBookingRule
+    {
+    }
+
+    public interface ISingletonCourtBookingRule : ICourtBookingRule
+    {
+    }
 }

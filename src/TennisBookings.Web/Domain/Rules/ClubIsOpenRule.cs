@@ -1,17 +1,16 @@
 ﻿using System.Threading.Tasks;
-using Microsoft.Extensions.Options;
 using TennisBookings.Web.Configuration;
 using TennisBookings.Web.Data;
 
 namespace TennisBookings.Web.Domain.Rules
 {
-    public class ClubIsOpenRule : ICourtBookingRule
+    public class ClubIsOpenRule : ISingletonCourtBookingRule
     {
-        private readonly ClubConfiguration _clubConfiguration;
+        private readonly IClubConfiguration _clubConfiguration;
 
-        public ClubIsOpenRule(IOptions<ClubConfiguration> options)
+        public ClubIsOpenRule(IClubConfiguration clubConfiguration)
         {
-            _clubConfiguration = options.Value;
+            _clubConfiguration = clubConfiguration;
         }
 
         public Task<bool> CompliesWithRuleAsync(CourtBooking booking)

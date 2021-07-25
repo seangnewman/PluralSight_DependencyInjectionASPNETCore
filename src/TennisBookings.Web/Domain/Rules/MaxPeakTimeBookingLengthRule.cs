@@ -5,14 +5,14 @@ using TennisBookings.Web.Data;
 
 namespace TennisBookings.Web.Domain.Rules
 {
-    public class MaxPeakTimeBookingLengthRule : ICourtBookingRule
+    public class MaxPeakTimeBookingLengthRule : ISingletonCourtBookingRule
     {
-        private readonly ClubConfiguration _clubConfiguration;
+        private readonly IClubConfiguration _clubConfiguration;
         private readonly BookingConfiguration _bookingConfiguration;
 
-        public MaxPeakTimeBookingLengthRule(IOptions<ClubConfiguration> clubConfiguration, IOptions<BookingConfiguration> options)
+        public MaxPeakTimeBookingLengthRule(IClubConfiguration clubConfiguration, IOptions<BookingConfiguration> options)
         {
-            _clubConfiguration = clubConfiguration.Value;
+            _clubConfiguration = clubConfiguration;
             _bookingConfiguration = options.Value;
         }
 

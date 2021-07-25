@@ -10,8 +10,6 @@ namespace TennisBookings.Web.Services
     {
         private static readonly ThreadLocal<Random> Random
             = new ThreadLocal<Random>(() => new Random());
-
-        private readonly Guid _instanceId = Guid.NewGuid();
         
         public GreetingService(IHostingEnvironment hostingEnvironment)
         {
@@ -38,7 +36,7 @@ namespace TennisBookings.Web.Services
 
         public string GetRandomGreeting()
         {
-            return GetRandomValue(Greetings) + " " + _instanceId;
+            return GetRandomValue(Greetings);
         }
 
         public string GetRandomLoginGreeting(string name)

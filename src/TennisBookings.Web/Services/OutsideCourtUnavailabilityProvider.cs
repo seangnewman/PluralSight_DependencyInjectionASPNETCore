@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Options;
 using TennisBookings.Web.Configuration;
 using TennisBookings.Web.Domain;
 
@@ -15,10 +14,8 @@ namespace TennisBookings.Web.Services
 
         private readonly int[] _winterMonths;
 
-        public OutsideCourtUnavailabilityProvider(ICourtService courtService, IOptions<ClubConfiguration> options)
+        public OutsideCourtUnavailabilityProvider(ICourtService courtService, IClubConfiguration clubConfiguration)
         {
-            var clubConfiguration = options.Value;
-            
             _courtService = courtService;
             _winterMonths = clubConfiguration.WinterMonths;
 

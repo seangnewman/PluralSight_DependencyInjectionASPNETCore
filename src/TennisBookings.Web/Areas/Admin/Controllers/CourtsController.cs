@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TennisBookings.Web.Areas.Admin.ViewModels;
 using TennisBookings.Web.Core;
-using TennisBookings.Web.Pages;
 using TennisBookings.Web.Services;
 
 namespace TennisBookings.Web.Areas.Admin.Controllers
@@ -16,12 +15,10 @@ namespace TennisBookings.Web.Areas.Admin.Controllers
     public class CourtsController : Controller
     {
         private readonly ICourtBookingService _courtBookingService;
-        
 
         public CourtsController(ICourtBookingService courtBookingService)
         {
             _courtBookingService = courtBookingService;
-            
         }
         
         [HttpGet]
@@ -88,7 +85,7 @@ namespace TennisBookings.Web.Areas.Admin.Controllers
         }
 
         [Route("Maintenance/Upcoming")]
-        public async Task<ActionResult> UpcomingMaintenance([FromServices] ICourtMaintenanceService courtMaintenanceService)
+        public async Task<ActionResult> UpcomingMaintenance([FromServices]ICourtMaintenanceService courtMaintenanceService)
         {
             var maintenanceSchedules = await courtMaintenanceService.GetUpcomingMaintenance();
 

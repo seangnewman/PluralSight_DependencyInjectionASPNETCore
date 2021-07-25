@@ -7,29 +7,18 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using TennisBookings.Web.Auditing;
-using TennisBookings.Web.Configuration;
-using TennisBookings.Web.Core.Caching;
+using Autofac;
+using TennisBookings.Web.Core.DependencyInjection;
 using TennisBookings.Web.Core.Middleware;
 using TennisBookings.Web.Data;
-using TennisBookings.Web.Domain;
-using TennisBookings.Web.Domain.Rules;
-using TennisBookings.Web.External;
 using TennisBookings.Web.Services;
-using TennisBookings.Web.Services.Notifications;
-using Microsoft.Extensions.Options;
-using System.Collections.Generic;
 
 namespace TennisBookings.Web
 {
     public class Startup
     {
-        private readonly IHostingEnvironment _hostingEnvironment;
-
-        public Startup(IConfiguration configuration, IHostingEnvironment hostingEnvironment)
+        public Startup(IConfiguration configuration)
         {
-            _hostingEnvironment = hostingEnvironment;
             Configuration = configuration;
         }
 
@@ -38,84 +27,19 @@ namespace TennisBookings.Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            //
-            services.AddAppConfiguration(Configuration);
-            //
-
-            services.AddHttpClient<IWeatherApiClient, WeatherApiClient>();
-            services.AddSingleton<IWeatherForecaster, WeatherForecaster>();
-
-            services.TryAddScoped<ILessonBookingService, LessonBookingService>();
-            services.TryAddScoped<ICourtService, CourtService>();
-            services.TryAddScoped<ICourtBookingManager, CourtBookingManager>();
-            services.TryAddScoped<IBookingService, BookingService>();
-            services.TryAddScoped<ICourtBookingService, CourtBookingService>();
-            services.TryAddScoped<ICourtMaintenanceService, CourtMaintenanceService>();
-
-            services.TryAddEnumerable(new[]
-            {
-                ServiceDescriptor.Singleton<ICourtBookingRule, ClubIsOpenRule>(),
-                ServiceDescriptor.Singleton<ICourtBookingRule, MaxBookingLengthRule>(),
-                ServiceDescriptor.Singleton<ICourtBookingRule, MaxPeakTimeBookingLengthRule>(),
-                ServiceDescriptor.Scoped<ICourtBookingRule, MemberCourtBookingsMaxHoursPerDayRule>()
-            });
-
-            services.TryAddScoped<IBookingRuleProcessor, BookingRuleProcessor>();
-
-            services.TryAddSingleton<IBookingConfiguration>(sp =>
-                sp.GetRequiredService<IOptions<BookingConfiguration>>().Value);
-
-            
-            services.AddSingleton < INotificationService>(sp =>
-                  new CompositeNotificationService(
-                      new INotificationService[] {
-                        sp.GetRequiredService<EmailNotificationService>(),
-                        sp.GetRequiredService<SmsNotificationService>()
-                     }));
-
-
-            services.TryAddTransient<IMembershipAdvertBuilder, MembershipAdvertBuilder>();
-            services.TryAddScoped<IMembershipAdvert>(sp =>
-            {
-                var builder = sp.GetService<IMembershipAdvertBuilder>();
-
-                builder.WithDiscount(10m);
-
-                return builder.Build();
-            });
-
-           
-            services.TryAddSingleton<IGreetingService>();
-            services.TryAddSingleton<IHomePageGreetingService>(sp => sp.GetRequiredService<GreetingService>());
-            services.TryAddSingleton<IGreetingService>(sp => sp.GetRequiredService<GreetingService>());
-
-
-
-            services.AddDistributedMemoryCache();
-
-            services.TryAddSingleton(typeof(IDistributedCache<>), typeof(DistributedCache<>));
-
-            services.TryAddSingleton<IDistributedCacheFactory, DistributedCacheFactory>();
-
-            services.TryAddEnumerable(new[]
-            {
-                ServiceDescriptor.Scoped<IUnavailabilityProvider, ClubClosedUnavailabilityProvider>(),
-                ServiceDescriptor.Scoped<IUnavailabilityProvider, ClubClosedUnavailabilityProvider>(),
-                ServiceDescriptor.Scoped<IUnavailabilityProvider, UpcomingHoursUnavailabilityProvider>(),
-                ServiceDescriptor.Scoped<IUnavailabilityProvider, OutsideCourtUnavailabilityProvider>(),
-                ServiceDescriptor.Scoped<IUnavailabilityProvider, CourtBookingUnavailabilityProvider>()
-            }); // register multiple implementations manually
-
-            services.AddSingleton<TimeService>();
-            services.AddSingleton<ITimeService>(x => x.GetService<TimeService>());
-            services.AddSingleton<IUtcTimeService>(x => x.GetService<TimeService>());
-
-            services.AddScoped(typeof(IAuditor<>), typeof(Auditor<>));
-
-            //MISSING services.AddSingleton<IStaffRolesOptionsService, StaffService>();
-            //MISSING services.AddSingleton<IStaffHolidayManager, StaffHolidayManager>();
-            //MISSING services.AddSingleton<IStaffShiftManager, StaffShiftManager>();
-            services.AddSingleton<IStaffRolesOptionsService, StaffRolesOptionsService>();
+            services.AddAppConfiguration(Configuration)                
+                .AddBookingServices()
+                .AddBookingRules()
+                .AddCourtUnavailability()
+                .AddMembershipServices()
+                .AddStaffServices()
+                //.AddCourtServices() - replaced with Autofac registration in ConfigureContainer
+                .AddWeatherForecasting()
+                .AddNotifications()                
+                .AddGreetings()
+                .AddCaching()
+                .AddTimeServices()
+                .AddAuditing();
             
             services.Configure<CookiePolicyOptions>(options =>
             {                
@@ -139,7 +63,7 @@ namespace TennisBookings.Web
 
             services.AddDbContext<TennisBookingDbContext>(options =>
                 options.UseSqlServer(
-                    Configuration.GetConnectionString("DefaultConnection")));
+                    Configuration.GetConnectionString("DefaultConnection")));           
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -162,6 +86,14 @@ namespace TennisBookings.Web
 
             app.UseLastRequestTracking(); // only track requests which make it to MVC, i.e. not static files
             app.UseMvc();
+        }
+
+        // This method is called after ConfigureServices
+        public void ConfigureContainer(ContainerBuilder builder)
+        {
+            builder.RegisterType<CourtMaintenanceService>()
+                .As<ICourtMaintenanceService>()
+                .InstancePerLifetimeScope();
         }
     }
 }

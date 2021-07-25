@@ -15,13 +15,13 @@ namespace TennisBookings.Web.Pages
     {
         private readonly UserManager<TennisBookingsUser> _userManager;
         private readonly ICourtBookingService _courtBookingService;
-        //private readonly IGreetingService _loginGreetingService;
+        private readonly IGreetingService _loginGreetingService;
 
-        public BookingsModel(UserManager<TennisBookingsUser> userManager, ICourtBookingService courtBookingService/*, IGreetingService loginGreetingService*/)
+        public BookingsModel(UserManager<TennisBookingsUser> userManager, ICourtBookingService courtBookingService, IGreetingService loginGreetingService)
         {
             _userManager = userManager;
             _courtBookingService = courtBookingService;
-            //_loginGreetingService = loginGreetingService;
+            _loginGreetingService = loginGreetingService;
         }
 
         public IEnumerable<IGrouping<DateTime, CourtBooking>> CourtBookings { get; set; }
@@ -40,7 +40,7 @@ namespace TennisBookings.Web.Pages
             if (user == null)
                 return new ChallengeResult();
 
-            Greeting = $"Hello {user.Member.Forename} {user.Member.Surname}"; // _loginGreetingService.GetRandomLoginGreeting($"{user.Member.Forename} {user.Member.Surname}");
+            Greeting = _loginGreetingService.GetRandomLoginGreeting($"{user.Member.Forename} {user.Member.Surname}");
 
             var bookings = await _courtBookingService.GetFutureBookingsForMemberAsync(user.Member);
 
